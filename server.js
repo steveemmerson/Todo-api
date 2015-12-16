@@ -38,26 +38,6 @@ app.get('/todos', function(req, res) {
 	}, function(e) {
 		res.status(500).send();
 	})
-
-	// var filteredTodos = todos;
-
-	// if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-	// 	filteredTodos = _.findWhere(filteredTodos, {
-	// 		completed: true
-	// 	});
-	// } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-	// 	filteredTodos = _.findWhere(filteredTodos, {
-	// 		completed: false
-	// 	});
-	// };
-
-	// if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-	// 	filteredTodos = _.filter(filteredTodos, function(todo) {
-	// 		return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
-	// 	})
-	// }
-
-	// res.json(filteredTodos);
 });
 
 // GET /todos/:id
@@ -90,12 +70,12 @@ app.post('/todos', function(req, res) {
 // DELETE /todos/:id
 app.delete('/todos/:id', function(req, res) {
 	var todoID = parseInt(req.params.id, 10);
-	
+
 	db.todo.destroy({
 		where: {
 			id: todoID
 		}
-	}).then(function (rowsDeleted) {
+	}).then(function(rowsDeleted) {
 		if (rowsDeleted === 0) {
 			res.status(404).json({
 				error: 'There is no todo with that ID'
@@ -103,7 +83,7 @@ app.delete('/todos/:id', function(req, res) {
 		} else {
 			res.status(204).send();
 		}
-	}, function () {
+	}, function() {
 		res.status(500).send();
 	});
 });
@@ -120,22 +100,32 @@ app.put('/todos/:id', function(req, res) {
 
 	if (body.hasOwnProperty('description')) {
 		attributes.description = body.description.trim();
-	} 
+	}
 
-	db.todo.findById(todoID).then(function (todo) {
-		if (todo){
+	db.todo.findById(todoID).then(function(todo) {
+		if (todo) {
 			return todo.update(attributes);
 		} else {
 			res.status(404).send();
 		}
-	}, function () {
+	}, function() {
 		res.status(500).send();
-	}).then (function (todo) {
+	}).then(function(todo) {
 		res.json(todo.toJSON())
-	}, function (e) {
+	}, function(e) {
 		res.status(400).json(e);
 	})
 
+});
+
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+
+	db.user.create(body).then(function(user) {
+		res.json(user.toJSON());
+	}, function(e) {
+		res.status(400).json(e);
+	})
 });
 
 db.sequelize.sync().then(function() {
